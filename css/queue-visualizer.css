@@ -1,0 +1,566 @@
+/* ==========================================================================
+   QUEUE DATA STRUCTURE VISUALIZER & STUDIO STYLES
+   Visualizing FIFO Pointers (Front / Rear), Memory Slots, and Operations
+   ========================================================================== */
+
+.ds-studio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.ds-header-titles h2 {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ds-header-titles p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.ds-mode-switcher {
+  display: flex;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px 16px;
+  font-family: var(--font-heading);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: var(--amber-primary);
+  color: #000;
+}
+
+/* Metric / Pointer State Cards */
+.ds-pointer-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pointer-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pointer-stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.pointer-stat-card.front-stat::after { background: var(--amber-primary); }
+.pointer-stat-card.rear-stat::after { background: var(--cyan-accent); }
+.pointer-stat-card.size-stat::after { background: var(--emerald-success); }
+.pointer-stat-card.cap-stat::after { background: var(--purple-badge); }
+
+.stat-label {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.pointer-stat-card.front-stat .stat-value { color: var(--amber-primary); }
+.pointer-stat-card.rear-stat .stat-value { color: var(--cyan-accent); }
+
+.stat-sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  display: block;
+  margin-top: 2px;
+}
+
+/* Interactive Playground Toolbar */
+.ds-playground-toolbar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.toolbar-actions-left {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toolbar-actions-right {
+  display: flex;
+  gap: 10px;
+}
+
+/* Visualizer Container Stage */
+.visualizer-stage {
+  background: rgba(11, 15, 25, 0.95);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  margin-bottom: 28px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow-x: auto;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.stage-title-tag {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ==========================================================================
+   1. ARRAY CIRCULAR BUFFER VIEW
+   ========================================================================== */
+.circular-buffer-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(115px, 1fr));
+  gap: 12px;
+  padding: 30px 10px 10px;
+}
+
+@media (max-width: 1300px) {
+  .circular-buffer-grid {
+    grid-template-columns: repeat(5, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .circular-buffer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.queue-slot-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 12px;
+  min-height: 140px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.queue-slot-card.empty {
+  border-style: dashed;
+  background: rgba(255, 255, 255, 0.02);
+  opacity: 0.7;
+}
+
+.queue-slot-card.occupied {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(26, 36, 58, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  animation: slotPop 0.3s ease;
+}
+
+@keyframes slotPop {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.queue-slot-card.is-front {
+  border-color: var(--amber-primary);
+  box-shadow: 0 0 20px var(--amber-glow);
+}
+
+.queue-slot-card.is-rear {
+  border-color: var(--cyan-accent);
+  box-shadow: 0 0 20px var(--cyan-glow);
+}
+
+.queue-slot-card.is-front.is-rear {
+  border-color: #f43f5e;
+  box-shadow: 0 0 24px rgba(244, 63, 94, 0.4);
+}
+
+.slot-pointers {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.pointer-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.pointer-tag.front-tag {
+  background: var(--amber-primary);
+  color: #000;
+}
+
+.pointer-tag.rear-tag {
+  background: var(--cyan-accent);
+  color: #000;
+}
+
+.slot-index-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.slot-order-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-order-id {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.slot-cust {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slot-mem {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--cyan-accent);
+}
+
+.slot-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 4px;
+}
+
+.slot-empty-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.empty-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.peek-highlight {
+  animation: pulseGlow 1.8s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1); box-shadow: 0 0 10px #fbbf24; }
+  50% { transform: scale(1.06); box-shadow: 0 0 35px #f59e0b; }
+  100% { transform: scale(1); box-shadow: 0 0 10px #fbbf24; }
+}
+
+/* ==========================================================================
+   2. LINKED LIST NODE VIEW
+   ========================================================================== */
+.linked-nodes-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 30px 10px;
+  overflow-x: auto;
+}
+
+.head-pointer-marker {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--amber-primary);
+  background: rgba(245, 158, 11, 0.15);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--amber-primary);
+  white-space: nowrap;
+}
+
+.tail-pointer-marker {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--cyan-accent);
+  background: rgba(6, 182, 212, 0.15);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--cyan-accent);
+  white-space: nowrap;
+}
+
+.linked-node-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.node-box {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  width: 170px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.node-box.is-head {
+  border-color: var(--amber-primary);
+}
+
+.node-box.is-tail {
+  border-color: var(--cyan-accent);
+}
+
+.node-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.node-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.node-body strong {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.node-body span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.node-next-pointer {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--emerald-success);
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 6px;
+}
+
+.node-arrow {
+  font-size: 26px;
+  color: var(--emerald-success);
+}
+
+/* ==========================================================================
+   ALGORITHMIC COMPLEXITY & THEORY CARDS
+   ========================================================================== */
+.ds-theory-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 900px) {
+  .ds-theory-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.theory-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.theory-card h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.complexity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.complexity-table th {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+}
+
+.complexity-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.badge-o1 {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge-on {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   AUDIT LOGS SECTION
+   ========================================================================== */
+.audit-logs-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.audit-logs-card h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.audit-logs-list {
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.log-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.log-row.overflow, .log-row.underflow {
+  background: rgba(244, 63, 94, 0.15);
+  border-left: 3px solid var(--rose-danger);
+}
+
+.log-time {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  min-width: 60px;
+}
+
+.log-badge {
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+
+.log-badge.enqueue { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.log-badge.dequeue { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.log-badge.peek { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+.log-badge.overflow_error, .log-badge.underflow_error { background: rgba(244, 63, 94, 0.3); color: #f87171; }
+
+.log-msg {
+  flex-grow: 1;
+  color: var(--text-muted);
+}
+
+.log-complexity {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}

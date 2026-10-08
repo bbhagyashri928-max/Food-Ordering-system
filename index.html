@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Food Order Processing System | User & Admin Dashboards</title>
+  <meta name="description" content="A complete online food order processing system simulating queue management with dedicated User (Customer) and Admin (Kitchen & DS Manager) dashboards.">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/queue-visualizer.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ==========================================
+         TOP HEADER BAR
+         ========================================== -->
+    <header class="main-header">
+      <div class="brand-wrapper">
+        <div class="brand-logo-icon">🍔</div>
+        <div class="brand-titles">
+          <h1>Online Food Order Processing System</h1>
+          <span class="brand-sub">Queue Data Structure • Dual Portal Architecture</span>
+        </div>
+      </div>
+
+      <div class="header-status-group">
+        <div class="queue-badge" id="header-queue-badge">
+          Queue: 0 orders
+        </div>
+        <button class="btn btn-secondary btn-sm" id="sound-toggle-btn">
+          🔊 Sound On
+        </button>
+      </div>
+    </header>
+
+    <!-- ==========================================
+         PORTAL / DASHBOARD SWITCHER
+         ========================================== -->
+    <section class="portal-role-bar">
+      <div class="role-selector" role="group" aria-label="Dashboard Selection">
+        <button class="role-btn active" id="btn-portal-user" onclick="switchPortal('user')">
+          <span class="role-icon">👤</span>
+          <div class="role-text">
+            <span class="role-title">Customer Dashboard</span>
+            <span class="role-desc">Order Food, Live Queue Tracking & Receipts</span>
+          </div>
+        </button>
+
+        <button class="role-btn admin-btn" id="btn-portal-admin" onclick="switchPortal('admin')">
+          <span class="role-icon">🛡️</span>
+          <div class="role-text">
+            <span class="role-title">
+              Admin & Kitchen Console
+              <span class="admin-badge">Staff Access</span>
+            </span>
+            <span class="role-desc">Queue Engine, KDS, Stock & Analytics</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="role-current-indicator">
+        <span class="pulse-dot"></span>
+        <span id="role-indicator-text">Active View: <strong>Customer Dashboard</strong></span>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         ==========================================================================
+         DASHBOARD 1: USER / CUSTOMER PORTAL
+         ==========================================================================
+         ========================================================================== -->
+    <div class="portal-container active-portal" id="portal-user">
+      
+      <!-- Customer Welcome Banner -->
+      <div class="dashboard-welcome-banner">
+        <div class="banner-left">
+          <h2>👋 Welcome to Gourmet Food Lab</h2>
+          <p>Fresh artisan meals cooked strictly in chronological order. No order is skipped or delayed.</p>
+        </div>
+        <div class="banner-right">
+          <button class="btn btn-sm btn-secondary" onclick="switchUserTab('user-tracker-tab')">
+            📍 Track My Active Order
+          </button>
+        </div>
+      </div>
+
+      <!-- Customer Sub-Navigation Tabs -->
+      <nav class="navigation-bar" role="tablist">
+        <button class="nav-tab active" data-tab="user-menu-tab" onclick="switchUserTab('user-menu-tab')">
+          <span>🍔 Browse Menu & Place Order</span>
+          <span class="tab-badge cart-count-badge">0</span>
+        </button>
+
+        <button class="nav-tab" data-tab="user-tracker-tab" onclick="switchUserTab('user-tracker-tab')">
+          <span>📍 Live Order Tracker</span>
+        </button>
+
+        <button class="nav-tab" data-tab="user-history-tab" onclick="switchUserTab('user-history-tab')">
+          <span>🧾 My Receipts & History</span>
+        </button>
+      </nav>
+
+      <!-- Customer Tab 1: Menu & Cart Placement -->
+      <div class="tab-pane active" id="user-menu-tab">
+        <!-- Quick Preset Evaluation Orders -->
+        <section class="demo-preset-banner">
+          <div class="preset-info">
+            <span class="icon">⚡</span>
+            <div>
+              <h4>Quick One-Click Orders</h4>
+              <p>Instantly populate your cart with gourmet combinations to test the Queue:</p>
+            </div>
+          </div>
+          <div class="preset-buttons-group">
+            <button class="preset-btn" data-preset="0">+ Burger & Brew</button>
+            <button class="preset-btn" data-preset="1">+ Spicy Pizza</button>
+            <button class="preset-btn" data-preset="2">+ Healthy Asian</button>
+            <button class="preset-btn" data-preset="3">+ Deluxe Italian</button>
+          </div>
+        </section>
+
+        <!-- Category Filter Chips -->
+        <nav class="category-filter-bar" aria-label="Menu categories">
+          <button class="category-chip active" data-category="all">🍽️ All Items</button>
+          <button class="category-chip" data-category="burgers">🍔 Gourmet Burgers</button>
+          <button class="category-chip" data-category="pizzas">🍕 Artisan Pizzas</button>
+          <button class="category-chip" data-category="asian">🍜 Bowls & Asian</button>
+          <button class="category-chip" data-category="beverages">🥤 Drinks & Brews</button>
+          <button class="category-chip" data-category="desserts">🍰 Sweet Treats</button>
+        </nav>
+
+        <!-- Menu Grid + Floating Cart -->
+        <div class="order-layout-grid">
+          <section class="menu-grid-section">
+            <div class="menu-grid" id="menu-grid">
+              <!-- Rendered by JS -->
+            </div>
+          </section>
+
+          <aside class="cart-panel">
+            <div class="cart-header">
+              <h3><span>🛒</span> Order Cart</h3>
+              <button class="btn btn-xs btn-outline" id="clear-cart-btn">Clear</button>
+            </div>
+
+            <div class="cart-empty-state" id="cart-empty-state">
+              <span class="empty-icon">🍽️</span>
+              <p>Your cart is empty.</p>
+              <p style="font-size: 0.75rem; margin-top: 4px;">Select delicious items from the menu or choose a quick preset above.</p>
+            </div>
+
+            <div class="cart-items-list" id="cart-items-list">
+              <!-- Rendered by JS -->
+            </div>
+
+            <div class="cart-footer" id="cart-footer" style="display: none;">
+              <form id="checkout-form" class="checkout-details-form">
+                <div class="form-group">
+                  <label for="cust-name">Customer Name *</label>
+                  <input type="text" id="cust-name" class="form-control" placeholder="e.g. Liam Smith" required>
+                </div>
+
+                <div class="form-row-dual">
+                  <div class="form-group">
+                    <label for="order-type">Order Type</label>
+                    <select id="order-type" class="form-control">
+                      <option value="Dine-In">Dine-In</option>
+                      <option value="Takeaway">Takeaway</option>
+                      <option value="Online Delivery">Delivery</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="table-input">Table / Address</label>
+                    <input type="text" id="table-input" class="form-control" value="Table 1" placeholder="Table # or Address">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="order-notes">Kitchen Notes</label>
+                  <input type="text" id="order-notes" class="form-control" placeholder="Extra spicy, no ice, etc.">
+                </div>
+
+                <div class="bill-breakdown">
+                  <div class="bill-line">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">$0.00</span>
+                  </div>
+                  <div class="bill-line">
+                    <span>Tax (5% GST)</span>
+                    <span id="cart-tax">$0.00</span>
+                  </div>
+                  <div class="bill-line">
+                    <span>Est. Prep Time</span>
+                    <span id="cart-est-prep">~15s</span>
+                  </div>
+                  <div class="bill-line total">
+                    <span>Total Amount</span>
+                    <span class="val" id="cart-total">$0.00</span>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn-place-order" id="btn-submit-order">
+                  <span>🚀 Place Order (Enqueue)</span>
+                </button>
+              </form>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Customer Tab 2: Live Status Tracker -->
+      <div class="tab-pane" id="user-tracker-tab">
+        <div class="tracker-search-section">
+          <h3>🔍 Track Live Order Status</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+            Watch your order move through the Queue in real time from Kitchen cooking to Pickup Counter:
+          </p>
+
+          <div class="tracker-search-bar">
+            <input type="text" id="tracker-search-input" class="form-control" placeholder="Enter Order ID (e.g. ORD-1003)...">
+            <button class="btn btn-primary" id="tracker-search-btn">Search</button>
+          </div>
+
+          <div class="tracker-recent-wrapper">
+            <span style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">Select an Active Order:</span>
+            <div class="tracker-recent-chips" id="tracker-recent-chips">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="tracker-empty-prompt" id="tracker-empty-prompt" style="text-align: center; padding: 60px 20px; color: var(--text-dim);">
+          <span style="font-size: 48px; display: block; margin-bottom: 12px;">📍</span>
+          <h3>No Order Selected</h3>
+          <p>Enter your Order ID above or click one of the recent order chips to track its live status.</p>
+        </div>
+
+        <div id="tracker-result-container" style="display: none;">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <!-- Customer Tab 3: My Order History & Receipts -->
+      <div class="tab-pane" id="user-history-tab">
+        <div class="section-panel-header">
+          <h3><span>🧾</span> My Past Orders & Digital Receipts</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted);">View, print, or download invoices</span>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Order Type & Table</th>
+                <th>Items Ordered</th>
+                <th>Total Bill</th>
+                <th>Preparation Duration</th>
+                <th>Status</th>
+                <th>Receipt</th>
+              </tr>
+            </thead>
+            <tbody id="user-orders-tbody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==========================================================================
+         ==========================================================================
+         DASHBOARD 2: ADMIN & KITCHEN CONSOLE
+         ==========================================================================
+         ========================================================================== -->
+    <div class="portal-container" id="portal-admin">
+      
+      <!-- Admin Header Banner -->
+      <div class="dashboard-welcome-banner admin-mode">
+        <div class="banner-left">
+          <h2>🛡️ Kitchen Operations & Queue Control Console</h2>
+          <p>Real-time Queue dispatch engine, chef workstation monitoring, stock control, and algorithm inspection.</p>
+        </div>
+        <div class="banner-right" style="display: flex; gap: 10px;">
+          <button class="btn btn-sm btn-primary" id="admin-cook-btn">
+            🍳 Cook Next in Queue
+          </button>
+          <button class="btn btn-sm btn-outline" id="admin-reload-btn">
+            🔄 Reload Demo Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Sub-Navigation Tabs -->
+      <nav class="navigation-bar" role="tablist">
+        <button class="nav-tab active" data-tab="admin-kitchen-tab" onclick="switchAdminTab('admin-kitchen-tab')">
+          <span>🍳 Kitchen Display System (KDS)</span>
+        </button>
+
+        <button class="nav-tab" data-tab="admin-ds-tab" onclick="switchAdminTab('admin-ds-tab')">
+          <span>🔬 Queue DS Studio & Visualizer</span>
+        </button>
+
+        <button class="nav-tab" data-tab="admin-inventory-tab" onclick="switchAdminTab('admin-inventory-tab')">
+          <span>📋 Menu Stock & Chef Stations</span>
+        </button>
+
+        <button class="nav-tab" data-tab="admin-analytics-tab" onclick="switchAdminTab('admin-analytics-tab')">
+          <span>📊 Analytics & Audit Logs</span>
+        </button>
+      </nav>
+
+      <!-- Admin Tab 1: Kitchen Display System (KDS) -->
+      <div class="tab-pane active" id="admin-kitchen-tab">
+        <div class="kitchen-toolbar">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700;">👨‍🍳 Active Kitchen Dispatch Engine</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Incoming orders are processed in strict queue sequence.</p>
+          </div>
+
+          <div class="toolbar-controls">
+            <label class="toggle-switch-label">
+              <input type="checkbox" id="auto-cook-toggle" checked>
+              <span>Auto Cook</span>
+            </label>
+
+            <button class="btn btn-sm btn-secondary" id="manual-cook-btn">
+              🍳 Cook Next in Queue
+            </button>
+
+            <div class="speed-control-group">
+              <span>Simulation Speed:</span>
+              <div class="speed-pills">
+                <button class="speed-pill active" data-speed="1.0">1x</button>
+                <button class="speed-pill" data-speed="2.0">2x</button>
+                <button class="speed-pill" data-speed="5.0">5x</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Split Grid: Chef Stations + FIFO Queue Line -->
+        <div class="kitchen-main-grid">
+          <div class="kitchen-stations-column">
+            <div class="section-panel-header">
+              <h3><span>🔥</span> Active Cooking Workstations</h3>
+              <span id="active-chefs-indicator" style="font-size: 0.8rem; color: var(--text-muted);">2 Parallel Chefs</span>
+            </div>
+            <div class="chef-stations-grid" id="kitchen-stations-grid">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div class="kitchen-waiting-column">
+            <div class="section-panel-header">
+              <h3><span>⏳</span> Waiting Queue Line</h3>
+              <span class="queue-badge" id="waiting-queue-count">0</span>
+            </div>
+            <div class="kitchen-waiting-list" id="kitchen-waiting-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Completion & Customer Pickup Display -->
+        <div class="order-completion-board">
+          <div class="board-header">
+            <h2>📢 Public Order Status Display Board</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Live board for counter pickup and dine-in tables</p>
+          </div>
+
+          <div class="board-columns-grid">
+            <div class="board-column preparing">
+              <div class="col-title-bar">
+                <h4>⏳ NOW PREPARING</h4>
+                <span style="font-size: 0.8rem;">IN THE KITCHEN</span>
+              </div>
+              <div class="board-orders-list" id="board-cooking-list">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+            <div class="board-column ready">
+              <div class="col-title-bar">
+                <h4>✅ READY FOR PICKUP</h4>
+                <span class="tab-badge" id="ready-orders-count">0</span>
+              </div>
+              <div class="board-orders-list" id="board-ready-list">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Tab 2: Queue DS Studio & Visualizer -->
+      <div class="tab-pane" id="admin-ds-tab">
+        <div class="ds-studio-header">
+          <div class="ds-header-titles">
+            <h2>🔬 Queue Data Structure Visualizer</h2>
+            <p>Direct inspection of memory buffer slots, front/rear pointers, and operations.</p>
+          </div>
+
+          <div class="ds-mode-switcher">
+            <button class="mode-btn active" id="mode-circular-btn">Circular Array Queue</button>
+            <button class="mode-btn" id="mode-linked-btn">Linked List Nodes</button>
+          </div>
+        </div>
+
+        <!-- Pointer State Bar -->
+        <div class="ds-pointer-stats-bar">
+          <div class="pointer-stat-card front-stat">
+            <span class="stat-label">FRONT POINTER</span>
+            <span class="stat-value" id="ds-front-val">-1</span>
+            <span class="stat-sub">Next element to Dequeue</span>
+          </div>
+
+          <div class="pointer-stat-card rear-stat">
+            <span class="stat-label">REAR POINTER</span>
+            <span class="stat-value" id="ds-rear-val">-1</span>
+            <span class="stat-sub">Last element Enqueued</span>
+          </div>
+
+          <div class="pointer-stat-card size-stat">
+            <span class="stat-label">CURRENT SIZE</span>
+            <span class="stat-value" id="ds-size-val">0</span>
+            <span class="stat-sub">Waiting elements in line</span>
+          </div>
+
+          <div class="pointer-stat-card cap-stat">
+            <span class="stat-label">MAX CAPACITY</span>
+            <span class="stat-value" id="ds-capacity-val">10</span>
+            <span class="stat-sub">Buffer limit</span>
+          </div>
+        </div>
+
+        <!-- Playground Controls -->
+        <div class="ds-playground-toolbar">
+          <div class="toolbar-actions-left">
+            <button class="btn btn-sm btn-primary" id="ds-enqueue-btn">
+              ➕ Manual Enqueue
+            </button>
+            <button class="btn btn-sm btn-secondary" id="ds-dequeue-btn">
+              ➖ Manual Dequeue
+            </button>
+            <button class="btn btn-sm btn-outline" id="ds-peek-btn">
+              👁️ Peek Front
+            </button>
+          </div>
+
+          <div class="toolbar-actions-right">
+            <button class="btn btn-sm btn-outline" id="ds-overflow-test-btn">
+              ⚠️ Test Overflow
+            </button>
+            <button class="btn btn-sm btn-outline" id="ds-underflow-test-btn">
+              ⚠️ Test Underflow
+            </button>
+          </div>
+        </div>
+
+        <!-- Visual Stage -->
+        <div class="visualizer-stage">
+          <span class="stage-title-tag" id="visualizer-mode-label">Array-Based Circular Queue</span>
+          <div id="queue-visualizer-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Theory and Complexity -->
+        <div class="ds-theory-grid">
+          <div class="theory-card">
+            <h4>⏱️ Algorithmic Time & Space Complexity</h4>
+            <table class="complexity-table">
+              <thead>
+                <tr>
+                  <th>Operation</th>
+                  <th>Time Complexity</th>
+                  <th>Space Complexity</th>
+                  <th>Condition</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Enqueue()</strong></td>
+                  <td><span class="badge-o1">O(1)</span> Constant</td>
+                  <td><span class="badge-o1">O(1)</span></td>
+                  <td>rear = (rear + 1) % MAX</td>
+                </tr>
+                <tr>
+                  <td><strong>Dequeue()</strong></td>
+                  <td><span class="badge-o1">O(1)</span> Constant</td>
+                  <td><span class="badge-o1">O(1)</span></td>
+                  <td>front = (front + 1) % MAX</td>
+                </tr>
+                <tr>
+                  <td><strong>Peek / Front()</strong></td>
+                  <td><span class="badge-o1">O(1)</span> Constant</td>
+                  <td><span class="badge-o1">O(1)</span></td>
+                  <td>queue[front]</td>
+                </tr>
+                <tr>
+                  <td><strong>isEmpty() / isFull()</strong></td>
+                  <td><span class="badge-o1">O(1)</span> Constant</td>
+                  <td><span class="badge-o1">O(1)</span></td>
+                  <td>count == 0 / count == MAX</td>
+                </tr>
+                <tr>
+                  <td><strong>Search Order</strong></td>
+                  <td><span class="badge-on">O(N)</span> Linear</td>
+                  <td><span class="badge-o1">O(1)</span></td>
+                  <td>Scan front to rear</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="theory-card">
+            <h4>💡 Queue Principles in Order Processing</h4>
+            <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.8; padding-left: 20px;">
+              <li><strong>Fairness Guarantee:</strong> Orders are prepared in the exact chronological arrival order. No newer order can bypass an earlier order.</li>
+              <li><strong>Circular Buffer Optimization:</strong> Eliminates the costly <code>O(N)</code> shifting overhead of basic linear arrays by wrapping pointers using <code>(index + 1) % capacity</code>.</li>
+              <li><strong>Underflow Protection:</strong> Guards against attempting to cook or dequeue when zero orders are waiting.</li>
+              <li><strong>Overflow Protection:</strong> Prevents buffer overflow when the restaurant kitchen hits maximum queue capacity.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Tab 3: Menu Stock & Chef Stations Control -->
+      <div class="tab-pane" id="admin-inventory-tab">
+        <div class="capacity-controller-box">
+          <div>
+            <h4>📦 Queue Capacity & Chef Workstation Configuration</h4>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">Adjust kitchen capacity to simulate low/high traffic and test Overflow handling.</p>
+          </div>
+          
+          <div class="capacity-slider-group">
+            <label style="font-size: 0.85rem; font-weight: 700;">Queue Limit: <span id="capacity-slider-val" style="color: var(--cyan-accent); font-family: var(--font-mono);">10</span></label>
+            <input type="range" id="capacity-slider" min="5" max="20" value="10" step="1">
+          </div>
+
+          <div class="capacity-slider-group">
+            <label style="font-size: 0.85rem; font-weight: 700;">Chefs:</label>
+            <div class="speed-pills">
+              <button class="speed-pill" onclick="setAdminChefCount(1)">1 Chef</button>
+              <button class="speed-pill active" id="chef-pill-2" onclick="setAdminChefCount(2)">2 Chefs</button>
+              <button class="speed-pill" onclick="setAdminChefCount(3)">3 Chefs</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-panel-header">
+          <h3><span>🏷️</span> Menu Stock Management (In-Stock / 86'd Out-of-Stock)</h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted);">Toggle items to instantly update customer availability</span>
+        </div>
+
+        <div class="admin-control-grid" id="admin-inventory-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Admin Tab 4: Analytics & Audit Logs -->
+      <div class="tab-pane" id="admin-analytics-tab">
+        <div class="ds-pointer-stats-bar">
+          <div class="pointer-stat-card">
+            <span class="stat-label">QUEUED ORDERS</span>
+            <span class="stat-value" id="stat-queued">0</span>
+          </div>
+          <div class="pointer-stat-card">
+            <span class="stat-label">NOW PREPARING</span>
+            <span class="stat-value" id="stat-cooking">0</span>
+          </div>
+          <div class="pointer-stat-card">
+            <span class="stat-label">READY FOR PICKUP</span>
+            <span class="stat-value" id="stat-ready">0</span>
+          </div>
+          <div class="pointer-stat-card">
+            <span class="stat-label">COMPLETED ORDERS</span>
+            <span class="stat-value" id="stat-completed">0</span>
+          </div>
+          <div class="pointer-stat-card">
+            <span class="stat-label">TOTAL REVENUE</span>
+            <span class="stat-value" id="stat-revenue" style="color: var(--emerald-success);">$0.00</span>
+          </div>
+          <div class="pointer-stat-card">
+            <span class="stat-label">AVG TURNAROUND</span>
+            <span class="stat-value" id="stat-avg-wait">0s</span>
+          </div>
+        </div>
+
+        <div class="section-panel-header" style="margin-top: 24px;">
+          <h3><span>📋</span> Restaurant Order Ledger</h3>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-sm btn-outline" id="reset-system-btn">
+              🗑️ Reset System State
+            </button>
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Order Type</th>
+                <th>Items Ordered</th>
+                <th>Amount</th>
+                <th>Total Time</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="completed-orders-tbody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Audit Operation Logs -->
+        <div class="audit-logs-card" style="margin-top: 24px;">
+          <h4>
+            <span>📜 Live Queue Operation Audit Trail</span>
+            <span style="font-size: 0.78rem; color: var(--text-dim); font-weight: normal;">Chronological trace of all FIFO events</span>
+          </h4>
+          <div class="audit-logs-list" id="ds-audit-logs">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       GLOBAL MODAL DIALOG
+       ========================================== -->
+  <div class="modal-overlay" id="app-modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header-bar">
+        <h3 id="modal-title" style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700;">Notice</h3>
+        <button class="modal-close-x" onclick="closeModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body-container" id="modal-body-content">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ==========================================
+       JAVASCRIPT SCRIPTS
+       ========================================== -->
+  <script src="js/audio.js"></script>
+  <script src="js/queue.js"></script>
+  <script src="js/menu-data.js"></script>
+  <script src="js/kitchen.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
